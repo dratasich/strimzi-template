@@ -1,7 +1,7 @@
 import { File, render } from '@asyncapi/generator-react-sdk';
 
 // Import custom components from file
-import { Info } from '../components/common';
+import { Info, normalizeKubernetesName } from '../components/common';
 import { Topic } from '../components/Topic';
 
 /*
@@ -12,12 +12,13 @@ export default function ({ asyncapi }) {
 
   return Object.entries(channels).map(([channelName, channel]) => {
     if (!channel.hasSubscribe()) return null;
+    const name = normalizeKubernetesName(channelName)
 
     return (
-      <File name={`${channelName}.yaml`}>
+      <File name={`${name}.yaml`}>
         {render(<Info asyncapi={asyncapi} />)}
         {render(`---\n`)}
-        {render(<Topic channelName={channelName} channel={channel} />)}
+        {render(<Topic resourceName={name} channelName={channelName} channel={channel} />)}
         {render(`...\n`)}
       </File>
     );

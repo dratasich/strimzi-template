@@ -5,24 +5,40 @@ import { stringify } from 'yaml'
  *
  * Kubernetes resource: [KafkaTopic](https://strimzi.io/docs/operators/latest/configuring.html#type-KafkaTopicSpec-reference)
  */
-export function Topic({ channelName, channel }) {
+export function Topic({ resourceName, channelName, channel }) {
   // generate spec part of the k8s resource
+  // get config from kafka bindings of a channel (when available)
   let config = {}
-  try {
+  if (channel.subscribe().bindings().kafka)
     config = channel.subscribe().bindings().kafka
-  } catch (error) {
-    console.log("Failed to get kafka object from bindings")
-  }
   // set only when metadata.name is not a valid kubernetes resource name
-  //config["topicName"] = channelName
+  const topicName = normalizeKafkaName(channelName)
+  if (resourceName != topicName) {
+    config["topicName"] = topicName
+  }
   const spec = {"spec": config }
 
   // render
   return `apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
 metadata:
-  name: ${channelName}
+  name: ${resourceName}
   labels:
     strimzi.io/cluster: kafka
 ${stringify(spec)}`;
+}
+
+/*
+ * Modify a name to a valid Kafka topic name.
+ */
+export function normalizeKafkaName(name) {
+  // https://github.com/apache/kafka/blob/0.10.2/core/src/main/scala/kafka/common/Topic.scala#L24
+  // valid characters: [a-zA-Z0-9\\._\\-] (note that '/' is not supported as separator)
+  // max length: 249
+  let normalized = name.replace(/\//g, '.')
+  if (normalized.lenth > 249)
+    throw new Error("Invalid kafka topic name: length of 249 exceeded!")
+  if (normalized.match(/[a-zA-Z0-9\\._\\-]*/g)[0] != normalized)
+    throw new Error("Invalid kafka topic name: contains characters other than '[a-zA-Z0-9\\._\\-]'")
+  return normalized
 }
