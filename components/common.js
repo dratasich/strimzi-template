@@ -6,6 +6,16 @@
 import { Indent, IndentationTypes, withIndendation } from '@asyncapi/generator-react-sdk';
 
 /*
+ * Info comment for the beginning of a yaml file
+ */
+export function Info({ asyncapi }) {
+  return `# Generated from '${asyncapi.info().title()}' version ${asyncapi.info().version()}
+# asyncAPI id: ${asyncapi.id()}
+# generation date: ${new Date(Date.now()).toISOString()}
+`;
+}
+
+/*
   * Each component has a `childrenContent` property.
   * It is the processed children content of a component into a pure string. You can use it for compositions in your component.
   * 
