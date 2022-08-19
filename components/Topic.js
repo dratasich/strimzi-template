@@ -37,8 +37,8 @@ export function normalizeKafkaName(name) {
   // max length: 249
   let normalized = name.replace(/\//g, '.')
   if (normalized.lenth > 249)
-    throw new Error("Invalid kafka topic name: length of 249 exceeded!")
+    throw new Error(`Invalid kafka topic name. Length of 249 exceeded! Topic: '${normalized}'`)
   if (normalized.match(/[a-zA-Z0-9\\._\\-]*/g)[0] != normalized)
-    throw new Error("Invalid kafka topic name: contains characters other than '[a-zA-Z0-9\\._\\-]'")
+    throw new Error(`Invalid kafka topic name. Contains characters other than '[a-zA-Z0-9\\._\\-]'. Topic: '${normalized}'`)
   return normalized
 }
